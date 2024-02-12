@@ -3,7 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { typeOrmConfig } from './config/typeOrm.config'
 import { CategoryModule } from './category/category.module'
-import { ProductModule } from './product/product.module';
+import { ProductModule } from './product/product.module'
+import { OrderModule } from './order/order.module'
+import { ReviewModule } from './review/review.module'
+import { MediaModule } from './media/media.module'
 
 @Module({
 	controllers: [],
@@ -18,7 +21,10 @@ import { ProductModule } from './product/product.module';
 			useFactory: typeOrmConfig
 		}),
 		CategoryModule,
-		ProductModule
+		ProductModule,
+		OrderModule,
+		ReviewModule,
+		MediaModule
 	]
 })
 export class AppModule {}
