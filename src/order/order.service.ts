@@ -39,7 +39,7 @@ export class OrderService {
 			}
 		})
 		if (!order) throw new NotFoundException('Заказ не найден!')
-		
+
 		return order
 	}
 
@@ -56,6 +56,6 @@ export class OrderService {
 		await this.findOne(id)
 		await this.orderRepository.delete(id)
 
-		return await this.findOne(id)
+		return 'Продукт успешно удалён'
 	}
 }
