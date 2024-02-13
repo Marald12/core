@@ -1,26 +1,71 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { CreateProductDto } from './dto/create-product.dto'
+import { UpdateProductDto } from './dto/update-product.dto'
+import { InjectRepository } from '@nestjs/typeorm'
+import { FindOptionsWhereProperty, ILike, Repository } from 'typeorm'
+import { ProductEntity } from './entities/product.entity'
 
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
-  }
+	constructor(
+		@InjectRepository(ProductEntity)
+		private readonly productRepository: Repository<ProductEntity>
+	) {}
 
-  findAll() {
-    return `This action returns all product`;
-  }
+	async create(dto: CreateProductDto, categoryId: number) {
+		return await this.productRepository.save({
+			...dto,
+			category: {
+				id: categoryId
+			}
+		})
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+	async findAll(search?: string) {
+		let options: FindOptionsWhereProperty<ProductEntity> = {}
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
+		if (search) {
+			options = {
+				title: ILike(`%${search}%`)
+			}
+		}
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
-  }
+		return await this.productRepository.find({
+			where: { ...options },
+			relations: {
+				category: true
+			},
+			order: {
+				createdAt: 'desc'
+			}
+		})
+	}
+
+	async findOne(id: number) {
+		const product = await this.productRepository.findOne({
+			where: { id },
+			relations: {
+				category: true
+			}
+		})
+		if (!product) throw new NotFoundException('Продукт не найден!')
+
+		return product
+	}
+
+	async update(id: number, dto: UpdateProductDto) {
+		await this.findOne(id)
+		await this.productRepository.update(id, {
+			...dto
+		})
+
+		return await this.findOne(id)
+	}
+
+	async remove(id: number) {
+		await this.findOne(id)
+		await this.productRepository.delete(id)
+
+		return 'Продукт успешно удалена!'
+	}
 }

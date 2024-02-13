@@ -44,9 +44,11 @@ export class CategoryService {
 	async update(id: number, dto: UpdateCategoryDto) {
 		await this.findOne(id)
 
-		return await this.categoryRepository.update(id, {
+		await this.categoryRepository.update(id, {
 			...dto
 		})
+
+		return await this.findOne(id)
 	}
 
 	async remove(id: number) {
